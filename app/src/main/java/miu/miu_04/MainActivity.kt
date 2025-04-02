@@ -68,6 +68,7 @@ fun PhoneRecordSearchScreen(viewModel: CallViewModel = viewModel()) {
     var showInfoDialog by remember { mutableStateOf(false) }
     val searchResults by viewModel.searchResults.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val maxPhoneNumberLength = 9
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -144,7 +145,12 @@ fun PhoneRecordSearchScreen(viewModel: CallViewModel = viewModel()) {
 
             OutlinedTextField(
                 value = phoneNumber,
-                onValueChange = { phoneNumber = it },
+                onValueChange = { newValue ->
+                    val digitsOnly = newValue.filter { it.isDigit() }
+                    if (digitsOnly.length <= maxPhoneNumberLength) {
+                        phoneNumber = digitsOnly
+                    }
+                },
                 label = { Text("Numer telefonu") },
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Phone,
@@ -205,7 +211,6 @@ fun PhoneRecordSearchScreen(viewModel: CallViewModel = viewModel()) {
                 }
             }
 
-            // Add a button to insert sample data (for testing)
             TextButton(
                 onClick = { viewModel.addSampleData() },
                 modifier = Modifier.align(Alignment.End)
@@ -235,7 +240,7 @@ fun PhoneRecordSearchScreen(viewModel: CallViewModel = viewModel()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else if (searchResults.isEmpty()) {
                     Text(
-                        text = "Brak wyników dla numeru $phoneNumber",
+                        text = "Brak wyników",
                         modifier = Modifier.align(Alignment.Center),
                         textAlign = TextAlign.Center
                     )
